@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, StyleSheet, Text, View } from 'react-native';
 import * as Location from 'expo-location';
 import { WebView } from 'react-native-webview';
 import Button from '../components/Button';
@@ -20,6 +20,8 @@ const DEFAULT_REGION = {
 };
 
 function createMapHtml({ center, mode, mapStyle }) {
+  const isWeb = Platform.OS === 'web';
+
   return `
   <!DOCTYPE html>
   <html>
@@ -36,6 +38,7 @@ function createMapHtml({ center, mode, mapStyle }) {
       <div id="map"></div>
       <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
       <script>
+        const isWeb = ${isWeb};
         const mode = ${JSON.stringify(mode)};
         const mapStyle = ${JSON.stringify(mapStyle)};
         const center = ${JSON.stringify(center)};
@@ -70,12 +73,18 @@ function createMapHtml({ center, mode, mapStyle }) {
             ? polygonPoints
             : selectedBins.flatMap((bin) => bin.coordinates);
 
-          window.ReactNativeWebView.postMessage(JSON.stringify({
+          const message = JSON.stringify({
             type: 'selection',
             polygonPoints,
             selectedBins,
             flattened
-          }));
+          });
+          
+          if (isWeb) {
+            window.parent.postMessage(message, '*');
+          } else {
+            window.ReactNativeWebView.postMessage(message);
+          }
         }
 
         function clearPointMarkers() {
@@ -290,6 +299,27 @@ export default function MapScreen({ navigation }) {
     requestLocation();
   }, []);
 
+  const handleMapMessage = (data) => {
+    try {
+      const payload = JSON.parse(data);
+      if (payload.type === 'selection') {
+        setPolygonPoints(payload.polygonPoints || []);
+        setSelectedBins(payload.selectedBins || []);
+      }
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
+    const onMessageHandler = (event) => handleMapMessage(event.data);
+    window.addEventListener('message', onMessageHandler);
+
+    return () => window.removeEventListener('message', onMessageHandler);
+  }, []);
+
   const activeCoordinates = useMemo(
     () => (mode === 'polygon' ? polygonPoints : selectedBins.flatMap((bin) => bin.coordinates)),
     [mode, polygonPoints, selectedBins],
@@ -339,6 +369,25 @@ export default function MapScreen({ navigation }) {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const renderMap = () => {
+    if (Platform.OS === 'web') {
+      return <iframe title="Leaflet Map" srcDoc={html} style={styles.webView} />;
+    }
+
+    return (
+      <WebView
+        key={`${mode}-${mapStyle}-${webViewKey}`}
+        originWhitelist={['*']}
+        source={{ html }}
+        javaScriptEnabled
+        domStorageEnabled
+        mixedContentMode="compatibility"
+        style={styles.webView}
+        onMessage={(event) => handleMapMessage(event.nativeEvent.data)}
+      />
+    );
   };
 
   return (
@@ -397,24 +446,7 @@ export default function MapScreen({ navigation }) {
           </View>
         ) : (
           <>
-            <WebView
-              key={`${mode}-${mapStyle}-${webViewKey}`}
-              originWhitelist={['*']}
-              source={{ html }}
-              javaScriptEnabled
-              domStorageEnabled
-              mixedContentMode="compatibility"
-              style={styles.webView}
-              onMessage={(event) => {
-                try {
-                  const data = JSON.parse(event.nativeEvent.data);
-                  if (data.type === 'selection') {
-                    setPolygonPoints(data.polygonPoints || []);
-                    setSelectedBins(data.selectedBins || []);
-                  }
-                } catch (error) {}
-              }}
-            />
+            {renderMap()}
             <View style={styles.mapHint}>
               <Text style={styles.mapHintText}>
                 {mode === 'polygon'
@@ -477,6 +509,7 @@ const styles = StyleSheet.create({
   webView: {
     flex: 1,
     backgroundColor: '#E2E8F0',
+    borderWidth: 0,
   },
   loader: {
     flex: 1,
