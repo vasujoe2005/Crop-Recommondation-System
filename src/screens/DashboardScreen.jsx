@@ -20,45 +20,44 @@ export default function DashboardScreen({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.hero}>
-        <Text style={styles.overline}>Farm Workspace</Text>
+        <Text style={styles.overline}>GeoSpatial Crop AI</Text>
         <Text style={styles.title}>Welcome, {user?.name || 'Farmer'}</Text>
         <Text style={styles.subtitle}>
-          Review land selections, generate crop guidance, and keep each field record organized in one place.
+          Mark a field, send its latitude and longitude to the backend, retrieve live soil and climate data,
+          and compare the land conditions against the crop dataset.
         </Text>
 
         <View style={styles.strip}>
-          <ActionStrip value="Map" label="Land selection" />
-          {/* <ActionStrip value="10" label="Static crops" /> */}
+          <ActionStrip value="Lat/Lon" label="Location input" />
+          <ActionStrip value="Live" label="Soil + weather" />
           <ActionStrip value="Save" label="History ready" />
         </View>
       </View>
 
       <Card title="Quick Actions" subtitle="Designed for faster use in the field" accent={colors.accent}>
-        <Button title="Select Farm Land" onPress={() => navigation.navigate('MapScreen')}  />
+        <Button title="Select Farm Land" onPress={() => navigation.navigate('MapScreen')} />
         <Button
           title="View Recommendation History"
           onPress={() => navigation.navigate('HistoryTab')}
-          variant="secondary" 
+          variant="secondary"
         />
-        <Button
-          title="Get Crop Recommendation"
-          onPress={() => navigation.navigate('MapScreen')}
-        />
+        <Button title="Get Crop Recommendation" onPress={() => navigation.navigate('MapScreen')} />
       </Card>
 
-      <Card title="Workflow" subtitle="Simple and repeatable">
-        <Text style={styles.step}>1. Mark your land using polygon points or grid bins.</Text>
-        <Text style={styles.step}>2. Save the selected farm boundary for the current field.</Text>
-        <Text style={styles.step}>3. Review the generated crop list and advisory details.</Text>
+      <Card title="Workflow" subtitle="Matches your flow diagram">
+        <Text style={styles.step}>1. Capture field location using a polygon or grid-based boundary.</Text>
+        <Text style={styles.step}>2. Send the centroid to the backend for soil and environmental data extraction.</Text>
+        <Text style={styles.step}>3. Score crops using pH, nutrient proxies, rainfall, humidity, temperature, and texture.</Text>
+        <Text style={styles.step}>4. Show the top crop matches with fertility, fertilizer, and irrigation advice.</Text>
       </Card>
 
-      <Card title="Field Notes" subtitle="Current build mode">
-        <Text style={styles.noteText}>
-          Recommendations are currently generated from a static dataset so the frontend can be demonstrated cleanly without depending on live backend scoring.
-        </Text>
+      <Card title="Live Data Sources" subtitle="Current integration status">
+        <Text style={styles.noteText}>ISRIC SoilGrids is used for soil pH, organic carbon, CEC, texture, and nutrient proxy inputs.</Text>
+        <Text style={styles.noteText}>Open-Meteo is used for rainfall, humidity, air temperature, soil moisture, and surface soil temperature.</Text>
+        <Text style={styles.noteText}>Google Earth Engine and MODIS or Sentinel NDVI are prepared as an extension point and can be enabled once you share the required credentials.</Text>
       </Card>
 
-      <Button title="Logout" onPress={signOut} variant="secondary"  />
+      <Button title="Logout" onPress={signOut} variant="secondary" />
     </ScrollView>
   );
 }
@@ -126,5 +125,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 15,
     lineHeight: 22,
+    marginBottom: 10,
   },
 });

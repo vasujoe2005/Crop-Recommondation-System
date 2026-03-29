@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme/colors';
 
 export default function Card({ title, subtitle, children, style, accent = '#2F855A' }) {
@@ -24,11 +24,20 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: 'rgba(216, 224, 210, 0.75)',
-    shadowColor: colors.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 3,
+    ...Platform.select({
+      ios: {
+        shadowColor: colors.shadow,
+        shadowOpacity: 0.08,
+        shadowRadius: 18,
+        shadowOffset: { width: 0, height: 10 },
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: `0 10px 18px ${colors.shadow}14`,
+      },
+    }),
   },
   header: {
     borderLeftWidth: 5,

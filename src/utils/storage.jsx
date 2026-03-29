@@ -4,6 +4,28 @@ const TOKEN_KEY = 'crop_ai_token';
 const USER_KEY = 'crop_ai_user';
 const HISTORY_KEY = 'crop_ai_recommendation_history';
 
+function sanitizeUserSegment(value = '') {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function buildUserHistoryKey(user) {
+  const identity =
+    sanitizeUserSegment(user?.email) ||
+    sanitizeUserSegment(user?.phone) ||
+    sanitizeUserSegment(user?.name);
+
+  return identity ? `${HISTORY_KEY}_${identity}` : HISTORY_KEY;
+}
+
+async function getCurrentHistoryKey() {
+  const user = await getStoredUser();
+  return buildUserHistoryKey(user);
+}
+
 export async function saveSession({ token, user }) {
   await AsyncStorage.multiSet([
     [TOKEN_KEY, token],
@@ -25,13 +47,15 @@ export async function clearSession() {
 }
 
 export async function getRecommendationHistoryStorage() {
-  const rawHistory = await AsyncStorage.getItem(HISTORY_KEY);
+  const historyKey = await getCurrentHistoryKey();
+  const rawHistory = await AsyncStorage.getItem(historyKey);
   return rawHistory ? JSON.parse(rawHistory) : [];
 }
 
 export async function saveRecommendationRecord(record) {
+  const historyKey = await getCurrentHistoryKey();
   const existing = await getRecommendationHistoryStorage();
   const nextHistory = [record, ...existing].slice(0, 30);
-  await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
+  await AsyncStorage.setItem(historyKey, JSON.stringify(nextHistory));
   return nextHistory;
 }

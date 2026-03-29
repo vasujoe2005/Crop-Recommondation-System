@@ -365,7 +365,7 @@ export default function MapScreen({ navigation }) {
         area,
       });
     } catch (error) {
-      Alert.alert('Recommendation failed', 'Unable to prepare the static recommendation.');
+      Alert.alert('Recommendation failed', 'Unable to retrieve the live geospatial recommendation. Check backend connectivity or provider access.');
     } finally {
       setIsSubmitting(false);
     }
@@ -548,3 +548,4 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
+

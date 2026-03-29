@@ -13,21 +13,25 @@ import Card from '../components/Card';
 import { getHistory } from '../services/api';
 
 function HistoryItem({ item, onPress }) {
+  const soil = item?.soil_data || {};
+  const climate = item?.climate_data || {};
+
   return (
     <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
       <Card
         title={item.farm_name || 'Farm Record'}
         subtitle={new Date(item.created_at || Date.now()).toLocaleString()}
       >
-        <Text style={styles.itemText}>Soil pH: {item.soil_ph ?? '--'}</Text>
+        <Text style={styles.itemText}>Soil pH: {soil?.ph ?? '--'}</Text>
         <Text style={styles.itemText}>
-          Temperature: {item.temperature ?? '--'}
-          {item.temperature ? ' C' : ''}
+          Temperature: {climate?.temp ?? '--'}
+          {climate?.temp !== undefined && climate?.temp !== null ? ' C' : ''}
         </Text>
         <Text style={styles.itemText}>
-          Rainfall: {item.rainfall ?? '--'}
-          {item.rainfall ? ' mm' : ''}
+          Rainfall: {climate?.rainfall ?? '--'}
+          {climate?.rainfall !== undefined && climate?.rainfall !== null ? ' mm' : ''}
         </Text>
+        <Text style={styles.itemText}>Texture: {soil?.texture || '--'}</Text>
         <Text style={styles.itemText}>
           Crops: {(item.top_crops || item.recommended_crops || [])
             .slice(0, 4)
