@@ -1,6 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text } from 'react-native';
+import { colors, typography } from '../theme/colors';
 
 export default function Button({
   title,
@@ -8,10 +8,10 @@ export default function Button({
   variant = 'primary',
   disabled = false,
   loading = false,
-  icon,
   style,
+  textStyle,
 }) {
-  const isSecondary = variant === 'secondary';
+  const isPrimary = variant === 'primary';
 
   return (
     <Pressable
@@ -19,87 +19,82 @@ export default function Button({
       disabled={disabled || loading}
       onPress={onPress}
       style={({ pressed }) => [
-        styles.button,
-        isSecondary ? styles.secondaryButton : styles.primaryButton,
+        styles.base,
+        isPrimary ? styles.primary : styles.secondary,
         pressed && !disabled && !loading ? styles.pressed : null,
         disabled ? styles.disabled : null,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isSecondary ? '#1F2937' : '#FFFFFF'} />
+        <ActivityIndicator color={isPrimary ? colors.textOnDark : colors.text} />
       ) : (
-        <View style={styles.content}>
-          {icon ? <Text style={styles.icon}>{icon}</Text> : null}
-          <Text style={[styles.text, isSecondary ? styles.secondaryText : styles.primaryText]}>
-            {title}
-          </Text>
-        </View>
+        <Text style={[styles.label, isPrimary ? styles.primaryLabel : styles.secondaryLabel, textStyle]}>
+          {title}
+        </Text>
       )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    minHeight: 60,
-    borderRadius: 20,
+  base: {
+    minHeight: 54,
     justifyContent: 'center',
-    paddingHorizontal: 22,
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderWidth: 2,
     marginVertical: 6,
     ...Platform.select({
       ios: {
         shadowColor: colors.shadow,
         shadowOpacity: 0.12,
-        shadowRadius: 14,
-        shadowOffset: { width: 0, height: 6 },
+        shadowRadius: 0,
+        shadowOffset: { width: 5, height: 5 },
       },
       android: {
-        elevation: 3,
+        elevation: 2,
       },
       web: {
-        boxShadow: `0 6px 14px ${colors.shadow}1F`, // Opacity approx 0.12
+        boxShadow: `5px 5px 0 ${colors.shadow}`,
       },
     }),
   },
-  primaryButton: {
+  primary: {
     backgroundColor: colors.primary,
-  },
-  secondaryButton: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
     borderColor: colors.border,
   },
-  disabled: {
-    opacity: 0.6,
+  secondary: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
   },
   pressed: {
-    transform: [{ scale: 0.985 }],
+    transform: [{ translateX: 1 }, { translateY: 1 }],
+    ...Platform.select({
+      ios: {
+        shadowOffset: { width: 4, height: 4 },
+      },
+      web: {
+        boxShadow: `4px 4px 0 ${colors.shadow}`,
+      },
+    }),
   },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  disabled: {
+    opacity: 0.55,
   },
-  icon: {
+  label: {
+    ...typography.body,
     fontSize: 14,
     fontWeight: '800',
-    color: colors.primaryDark,
-    backgroundColor: 'rgba(255,255,255,0.55)',
-    paddingHorizontal: 9,
-    paddingVertical: 6,
-    borderRadius: 999,
-    marginRight: 10,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    textAlign: 'center',
   },
-  text: {
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.2,
+  primaryLabel: {
+    color: colors.textOnDark,
   },
-  primaryText: {
-    color: '#FFFFFF',
-  },
-  secondaryText: {
+  secondaryLabel: {
     color: colors.text,
   },
 });

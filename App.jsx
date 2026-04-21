@@ -1,11 +1,11 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Platform, StatusBar, StyleSheet, View } from 'react-native';
-import * as ScreenCapture from 'expo-screen-capture';
+import { ActivityIndicator, StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import AuthContext from './src/context/AuthContext';
 import { hydrateSession, loginUser, logoutUser, registerUser } from './src/services/auth';
+import { colors } from './src/theme/colors';
 
 export default function App() {
   const [authState, setAuthState] = useState({
@@ -15,11 +15,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    // Restore any previously saved session before rendering navigation.
     const bootstrap = async () => {
-      if (Platform.OS !== 'web') {
-        await ScreenCapture.allowScreenCaptureAsync();
-      }
       const session = await hydrateSession();
       setAuthState({
         isLoading: false,
@@ -64,8 +60,8 @@ export default function App() {
     return (
       <SafeAreaProvider>
         <View style={styles.loaderContainer}>
-          <StatusBar barStyle="dark-content" />
-          <ActivityIndicator size="large" color="#2F855A" />
+          <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </SafeAreaProvider>
     );
@@ -73,7 +69,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <AuthContext.Provider value={authContextValue}>
         <AppNavigator />
       </AuthContext.Provider>
@@ -86,6 +82,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F4F7F0',
+    backgroundColor: colors.background,
   },
 });

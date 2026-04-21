@@ -3,25 +3,22 @@ import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import AuthStack from './AuthStack';
 import MainStack from './MainStack';
 import AuthContext from '../context/AuthContext';
+import { colors } from '../theme/colors';
 
 const navigationTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: '#F4F7F0',
-    card: '#FFFFFF',
-    text: '#1F2937',
-    primary: '#2F855A',
-    border: '#D7E2D8',
+    background: colors.background,
+    card: colors.surface,
+    text: colors.text,
+    primary: colors.primary,
+    border: colors.border,
   },
 };
 
 export default function AppNavigator() {
   const { isAuthenticated } = useContext(AuthContext);
 
-  return (
-    <NavigationContainer theme={navigationTheme}>
-      {isAuthenticated ? <MainStack /> : <AuthStack />}
-    </NavigationContainer>
-  );
+  return <NavigationContainer theme={navigationTheme}>{isAuthenticated ? <MainStack /> : <AuthStack />}</NavigationContainer>;
 }

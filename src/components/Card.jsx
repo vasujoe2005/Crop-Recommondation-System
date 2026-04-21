@@ -1,14 +1,17 @@
 import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme/colors';
+import { colors, typography } from '../theme/colors';
 
-export default function Card({ title, subtitle, children, style, accent = '#2F855A' }) {
+export default function Card({ title, subtitle, children, style, accent = colors.accent }) {
   return (
     <View style={[styles.card, style]}>
       {(title || subtitle) && (
-        <View style={[styles.header, { borderLeftColor: accent }]}>
-          {title ? <Text style={styles.title}>{title}</Text> : null}
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        <View style={styles.header}>
+          <View style={[styles.accentBar, { backgroundColor: accent }]} />
+          <View style={styles.headerCopy}>
+            {title ? <Text style={styles.title}>{title}</Text> : null}
+            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+          </View>
         </View>
       )}
       {children}
@@ -19,40 +22,49 @@ export default function Card({ title, subtitle, children, style, accent = '#2F85
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 24,
-    padding: 20,
+    borderWidth: 2,
+    borderColor: colors.border,
+    padding: 18,
     marginVertical: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(216, 224, 210, 0.75)',
     ...Platform.select({
       ios: {
         shadowColor: colors.shadow,
-        shadowOpacity: 0.08,
-        shadowRadius: 18,
-        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 0,
+        shadowOffset: { width: 6, height: 6 },
       },
       android: {
-        elevation: 3,
+        elevation: 2,
       },
       web: {
-        boxShadow: `0 10px 18px ${colors.shadow}14`,
+        boxShadow: `6px 6px 0 ${colors.shadow}`,
       },
     }),
   },
   header: {
-    borderLeftWidth: 5,
-    paddingLeft: 14,
-    marginBottom: 14,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  accentBar: {
+    width: 14,
+    alignSelf: 'stretch',
+    marginRight: 12,
+  },
+  headerCopy: {
+    flex: 1,
   },
   title: {
-    fontSize: 19,
-    fontWeight: '800',
+    ...typography.display,
+    fontSize: 24,
+    lineHeight: 30,
     color: colors.text,
   },
   subtitle: {
-    marginTop: 4,
-    fontSize: 13,
+    ...typography.body,
+    marginTop: 5,
+    fontSize: 14,
+    lineHeight: 20,
     color: colors.textMuted,
-    lineHeight: 18,
   },
 });

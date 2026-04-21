@@ -1,45 +1,18 @@
 import React, { useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import Card from '../components/Card';
 import { getHistory } from '../services/api';
+import { colors, typography } from '../theme/colors';
 
 function HistoryItem({ item, onPress }) {
-  const soil = item?.soil_data || {};
-  const climate = item?.climate_data || {};
-
+  const crops = (item.top_crops || item.recommended_crops || []).slice(0, 3).map((crop) => crop.name || crop.crop).join(', ');
   return (
-    <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
-      <Card
-        title={item.farm_name || 'Farm Record'}
-        subtitle={new Date(item.created_at || Date.now()).toLocaleString()}
-      >
-        <Text style={styles.itemText}>Soil pH: {soil?.ph ?? '--'}</Text>
-        <Text style={styles.itemText}>
-          Temperature: {climate?.temp ?? '--'}
-          {climate?.temp !== undefined && climate?.temp !== null ? ' C' : ''}
-        </Text>
-        <Text style={styles.itemText}>
-          Rainfall: {climate?.rainfall ?? '--'}
-          {climate?.rainfall !== undefined && climate?.rainfall !== null ? ' mm' : ''}
-        </Text>
-        <Text style={styles.itemText}>Texture: {soil?.texture || '--'}</Text>
-        <Text style={styles.itemText}>
-          Crops: {(item.top_crops || item.recommended_crops || [])
-            .slice(0, 4)
-            .map((crop) => crop.name || crop.crop)
-            .join(', ') || 'N/A'}
-        </Text>
-      </Card>
-    </TouchableOpacity>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}>
+      <Text style={styles.cardTitle}>{item.farm_name || 'Farm recommendation'}</Text>
+      <Text style={styles.cardMeta}>{new Date(item.created_at || Date.now()).toLocaleString()}</Text>
+      <Text style={styles.cardMeta}>Soil pH {item?.soil_data?.ph ?? '--'} | Temp {item?.climate_data?.temp ?? '--'} C</Text>
+      <Text style={styles.cardMeta}>Top crops: {crops || 'Not available'}</Text>
+    </Pressable>
   );
 }
 
@@ -58,10 +31,10 @@ export default function HistoryScreen() {
         setLoading(true);
       }
       setError('');
-      const data = await getHistory();
-      setHistory(Array.isArray(data) ? data : data?.items || []);
+      const items = await getHistory();
+      setHistory(items);
     } catch (fetchError) {
-      setError(fetchError?.response?.data?.detail || 'Unable to load history.');
+      setError(fetchError?.response?.data?.detail || 'We could not load the recommendation history.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -77,7 +50,7 @@ export default function HistoryScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2F855A" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -85,61 +58,34 @@ export default function HistoryScreen() {
   return (
     <FlatList
       data={history}
-      keyExtractor={(item, index) => item.id || item._id || `${index}`}
+      keyExtractor={(item, index) => item.id || `${index}`}
       contentContainerStyle={styles.list}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchHistory(true)} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchHistory(true)} tintColor={colors.primary} />}
       ListHeaderComponent={
         <View style={styles.header}>
-          <Text style={styles.title}>Recommendation History</Text>
-          <Text style={styles.subtitle}>
-            Saved farm selections and generated recommendations appear here.
-          </Text>
+          <Text style={styles.title}>Recommendation history</Text>
+          {/* <Text style={styles.subtitle}>Every recommendation is now stored with its farm, so the farmer can reopen any past result later.</Text> */}
           {error ? <Text style={styles.error}>{error}</Text> : null}
         </View>
       }
-      ListEmptyComponent={<Text style={styles.empty}>No recommendation history available.</Text>}
+      ListEmptyComponent={<Text style={styles.empty}>No recommendation history yet.</Text>}
       renderItem={({ item }) => (
-        <HistoryItem item={item} onPress={() => navigation.navigate('RecommendationScreen', { item })} />
+        <HistoryItem item={item} onPress={() => navigation.navigate('RecommendationScreen', { item, farm: item.farm_id ? { id: item.farm_id, name: item.farm_name } : null })} />
       )}
     />
   );
 }
 
 const styles = StyleSheet.create({
-  list: {
-    padding: 20,
-    paddingBottom: 28,
-  },
-  header: {
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#1F2937',
-  },
-  subtitle: {
-    marginTop: 8,
-    color: '#475569',
-    fontSize: 15,
-  },
-  error: {
-    marginTop: 8,
-    color: '#DC2626',
-  },
-  empty: {
-    color: '#64748B',
-    textAlign: 'center',
-    marginTop: 30,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  itemText: {
-    fontSize: 14,
-    color: '#334155',
-    marginBottom: 6,
-  },
+  list: { padding: 20, paddingBottom: 28, backgroundColor: colors.background },
+  header: { marginBottom: 10, borderBottomWidth: 2, borderBottomColor: colors.border, paddingBottom: 12 },
+  title: { ...typography.display, fontSize: 34, lineHeight: 40, color: colors.text },
+  subtitle: { ...typography.body, marginTop: 8, color: colors.textMuted, fontSize: 15, lineHeight: 22 },
+  error: { ...typography.body, marginTop: 8, color: colors.danger, fontSize: 13 },
+  empty: { ...typography.body, color: colors.textMuted, textAlign: 'center', marginTop: 30, fontSize: 15 },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+  card: { borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface, padding: 16, marginBottom: 12 },
+  pressed: { opacity: 0.92 },
+  cardTitle: { ...typography.display, fontSize: 24, lineHeight: 28, color: colors.text },
+  cardMeta: { ...typography.body, fontSize: 14, lineHeight: 20, color: colors.textMuted, marginTop: 6 },
 });

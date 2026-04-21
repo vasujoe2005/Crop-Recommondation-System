@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import { colors } from '../theme/colors';
 
 const Stack = createNativeStackNavigator();
 
@@ -10,7 +11,7 @@ export default function AuthStack() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#F4F7F0' },
+        contentStyle: { backgroundColor: colors.background },
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />

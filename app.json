@@ -1,28 +1,28 @@
 {
   "expo": {
-    "name": "Crop Recommendation",
-    "slug": "crop-recommendation-frontend",
+    "name": "GeoCrop AI",
+    "slug": "geocrop-ai",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/geocrop-ai-logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/geocrop-ai-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0f1713"
     },
     "plugins": [
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Allow Crop Recommendation to access your location for farm selection."
+          "locationWhenInUsePermission": "Allow GeoCrop AI to access your location for farm selection."
         }
       ]
     ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Allow Crop Recommendation to access your location for farm selection."
+        "NSLocationWhenInUseUsageDescription": "Allow GeoCrop AI to access your location for farm selection."
       }
     },
     "android": {
@@ -31,14 +31,14 @@
         "ACCESS_FINE_LOCATION"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#0f1713",
+        "foregroundImage": "./assets/geocrop-ai-logo.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/geocrop-ai-logo.png"
     }
   }
 }
